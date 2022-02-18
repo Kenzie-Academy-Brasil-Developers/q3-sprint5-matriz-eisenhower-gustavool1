@@ -15,9 +15,10 @@ class TasksModel(db.Model):
     importance:int = Column(Integer)
     urgency:int = Column(Integer)
 
-    task_id= relationship("TaskCategoriesModel", backref="task_id")
-    
-    eisenhower = Column(
+
+    task = relationship("TaskCategoriesModel", backref="task")
+
+    eisenhower_id = Column(
         Integer,
         ForeignKey("eisenhowers.id"),
         nullable=False

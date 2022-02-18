@@ -9,12 +9,12 @@ class TaskCategoriesModel(db.Model):
     __tablename__ = "tasks_categories"
     id:int = Column(Integer, primary_key = True, unique = True)
     
-    task = Column(
+    task_id = Column(
         Integer,
         ForeignKey("tasks.id")
     )
 
-    category = Column(
+    category_id = Column(
         Integer,
         ForeignKey("categories.id")
     )

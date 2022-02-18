@@ -14,4 +14,4 @@ class CategoriesModel(db.Model):
     name:str = Column(String(100), nullable = False, unique = True)
     description:str = Column(Text)
 
-    category_id = relationship("TaskCategoriesModel", backref = "category_id")
+    task = relationship("TaskCategoriesModel", backref = "category")

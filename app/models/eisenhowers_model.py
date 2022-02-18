@@ -11,4 +11,4 @@ class EisenhowersModel(db.Model):
     id:int = Column(Integer, primary_key = True)
     type:str = Column(String(100))
 
-    eisenhower_id = relationship("TasksModel", backref="eisenhower_id") 
+    eisenhower_id = relationship("TasksModel", backref="eisenhower") 
