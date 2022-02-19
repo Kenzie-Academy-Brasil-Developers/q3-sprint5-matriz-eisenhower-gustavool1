@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from app.configs.database import db
-from dataclasses import dataclass 
+from dataclasses import dataclass
+
+from app.models.categories_model import CategoriesModel 
 
 
 @dataclass
@@ -16,7 +18,8 @@ class TasksModel(db.Model):
     urgency:int = Column(Integer)
 
 
-    task = relationship("TaskCategoriesModel", backref="task")
+    # task = relationship("TaskCategoriesModel", backref="task")
+    # categories:CategoriesModel = relationship("CategoriesModel", backref="categories")
 
     eisenhower_id = Column(
         Integer,

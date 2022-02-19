@@ -1,8 +1,8 @@
 from http import HTTPStatus
 from app.models.eisenhowers_model import EisenhowersModel
-from flask import current_app
+from flask import current_app, session
 from app.models.categories_model import CategoriesModel
-
+from app.models.tasks_categories_model import TaskCategoriesModel
 def validating_body(importance, urgency):
     invalid_body = []
 
@@ -58,11 +58,20 @@ def finding_classfication(importance:int, urgency:int):
 
 def creating_category(categories):
     session = current_app.db.session
-
+    created_categories = []
     for categorie_to_add in categories:
         categorie = CategoriesModel(name=categorie_to_add)
         session.add(categorie)
         session.commit()
-
+        created_categories.append(categorie)
+    return created_categories
 
     
+def creating_tasks_categories(categorys_ids, task_id):
+    session = current_app.db.session
+
+    for id in categorys_ids:
+        task_categorie = TaskCategoriesModel(category_id = id, task_id = task_id)
+        session.add(task_categorie)
+
+    session.commit()
