@@ -1,8 +1,9 @@
 from http import HTTPStatus
 from app.models.eisenhowers_model import EisenhowersModel
-from flask import current_app, session
+from flask import current_app
 from app.models.categories_model import CategoriesModel
 from app.models.tasks_categories_model import TaskCategoriesModel
+from werkzeug.exceptions import BadRequest
 def validating_body(importance, urgency):
     invalid_body = []
 
@@ -17,13 +18,12 @@ def validating_body(importance, urgency):
         "importance": importance,
         "urgency": urgency
         }
-
-        return {
+        raise BadRequest(description= {
             "msg":{
             "valid_options":valid_body,
             "recieved_options":received_options
             }
-        }
+        })
 
     return False
 
@@ -75,3 +75,48 @@ def creating_tasks_categories(categorys_ids, task_id):
         session.add(task_categorie)
 
     session.commit()
+
+
+def validating_update(data):
+    allowed_fields = ["name", "description", "duration", "classification", "importance", "urgency", "categories"]
+    allowed_values = [1,2]
+
+    valid_body = {
+        "importance": [1, 2],
+        "urgency": [1, 2]
+    }
+    received_options = {
+        "importance": data.get("importance", None),
+        "urgency": data.get("urgency", None)
+    }
+
+    msg = {
+        "msg":{
+        "valid_options":valid_body,
+        "recieved_options":received_options
+        }
+    }
+
+    not_allowed_fields = [key for key in data.keys() if key not in allowed_fields]
+    
+    if not_allowed_fields:
+        raise BadRequest(description={"error":f"One field or morre not allowed : { not_allowed_fields } "})
+    
+    if data.get("importance") and data.get("importance") not in allowed_values:
+        raise BadRequest(description=msg)
+
+    if data.get("urgency") and data.get("urgency") not in allowed_values:
+        raise BadRequest(description=msg)
+
+
+
+
+def serialize_task(task):
+    return {
+        "id":task[0][0],
+        "name":task[0][1],
+        "description":task[0][2],
+        "duration":task[0][3],
+        "importance":task[0][4],
+        "urgency":task[0][5]   
+    }
