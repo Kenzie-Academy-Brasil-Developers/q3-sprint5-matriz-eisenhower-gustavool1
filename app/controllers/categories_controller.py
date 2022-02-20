@@ -1,3 +1,4 @@
+import enum
 from http import HTTPStatus
 from unicodedata import category, name
 from flask import current_app, jsonify, request
@@ -15,8 +16,10 @@ def create_categorie():
         session = current_app.db.session
         
         categorie = CategoriesModel(**data)
-
         session.add(categorie)
+        session.commit()
+        task_categorie = TaskCategoriesModel(category_id=categorie.id)
+        session.add(task_categorie)
         session.commit()
 
         return jsonify(categorie), HTTPStatus.CREATED
@@ -66,19 +69,19 @@ def get_categories():
     session = current_app.db.session
     all_task_categories = TaskCategoriesModel.query.all()
     all_categories = []
-
+    tasks = TasksModel.query.all()
+    if not tasks:
+        return jsonify([]), HTTPStatus.OK
     for task_categorie in all_task_categories:
         category = CategoriesModel.query.filter(CategoriesModel.id == task_categorie.category_id).first()
         category = serialize_categorie(category)
-
         task =  (session.query(
-        TasksModel.id,
-        TasksModel.name,
-        TasksModel.description,
-        TasksModel.duration,
-        TasksModel.importance,
-        TasksModel.urgency,
-        
+            TasksModel.id,
+            TasksModel.name,
+            TasksModel.description,
+            TasksModel.duration,
+            TasksModel.importance,
+            TasksModel.urgency,
         )
         .select_from(TaskCategoriesModel)
         .join(CategoriesModel)
@@ -86,8 +89,17 @@ def get_categories():
         .filter(task_categorie.category_id == TaskCategoriesModel.category_id )
         .all()
         )
-        task = serialize_task(task)
-        category["tasks"] = []
-        category["tasks"].append(task)
+        category["tasks"] = serialize_task(task) 
+            
+        if not task:
+            all_categories.append(category)
+
         all_categories.append(category)
-    return jsonify(all_categories)
+
+    non_repeated = []
+
+    for categorie in all_categories:
+        if categorie not in non_repeated:
+            non_repeated.append(categorie)
+    
+    return jsonify(non_repeated)

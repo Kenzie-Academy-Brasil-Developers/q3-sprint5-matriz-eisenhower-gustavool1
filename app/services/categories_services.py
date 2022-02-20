@@ -17,7 +17,6 @@ def updating_categories(categories, update):
             for key,value in update[index].items():
                 setattr(categorie, key, value)
                 session.add(categorie)
-        print(categorie)
             
     session.commit()
  

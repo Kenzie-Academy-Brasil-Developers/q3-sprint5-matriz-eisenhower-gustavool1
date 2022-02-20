@@ -109,14 +109,25 @@ def validating_update(data):
         raise BadRequest(description=msg)
 
 
+def linking_categories(categories, task_id):
+    session = current_app.db.session
 
+    for categorie in categories:
+        actual_categorie = CategoriesModel.query.filter(CategoriesModel.name == categorie).first()
+        linking_actual_categorie = TaskCategoriesModel(task_id = task_id, category_id=actual_categorie.id)
+        session.add(linking_actual_categorie)
+    session.commit()    
 
-def serialize_task(task):
-    return {
-        "id":task[0][0],
-        "name":task[0][1],
-        "description":task[0][2],
-        "duration":task[0][3],
-        "importance":task[0][4],
-        "urgency":task[0][5]   
-    }
+def serialize_task(tasks):
+    all_tasks = []
+    for task in tasks:
+        classification = finding_classfication(task.importance, task.urgency)
+        task = {
+            "id":task.id,
+            "name":task.name,
+            "description":task.description,
+            "classification": classification.type
+        }
+        all_tasks.append(task)
+
+    return all_tasks

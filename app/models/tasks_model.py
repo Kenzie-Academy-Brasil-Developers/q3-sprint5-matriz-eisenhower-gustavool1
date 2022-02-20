@@ -18,9 +18,6 @@ class TasksModel(db.Model):
     urgency:int = Column(Integer)
 
 
-    # task = relationship("TaskCategoriesModel", backref="task")
-    # categories:CategoriesModel = relationship("CategoriesModel", backref="categories")
-
     eisenhower_id = Column(
         Integer,
         ForeignKey("eisenhowers.id"),

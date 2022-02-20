@@ -14,10 +14,12 @@ class TaskCategoriesModel(db.Model):
     
     task_id:TasksModel = Column(
         Integer,
-        ForeignKey("tasks.id")
+        ForeignKey("tasks.id"),
+        nullable=True
+
     )
 
     category_id:CategoriesModel = Column(
         Integer,
-        ForeignKey("categories.id")
+        ForeignKey("categories.id"),
     )

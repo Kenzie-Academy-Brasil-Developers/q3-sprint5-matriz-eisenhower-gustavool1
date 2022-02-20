@@ -3,10 +3,10 @@ from flask import current_app, jsonify, request, session
 from app.models.tasks_categories_model import TaskCategoriesModel
 from app.models.categories_model import CategoriesModel
 from app.models.tasks_model import TasksModel
-from app.services.task_services import checking_repeated_categories, finding_classfication, creating_category, validating_body, creating_tasks_categories, validating_update
+from app.services.task_services import checking_repeated_categories, finding_classfication, creating_category, linking_categories, validating_body, creating_tasks_categories, validating_update
 from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, NotFound
 from app.services.categories_services import updating_categories
 
 
@@ -20,6 +20,13 @@ def create_task():
 
         if data.get("categories"):
             non_repeated_categories = checking_repeated_categories(data["categories"])
+            repeated_categories = []
+            for categorie in data["categories"]:
+                if categorie not in non_repeated_categories:
+                    repeated_categories.append(categorie)
+
+            
+
             created_categorys = creating_category(non_repeated_categories)
             categorys_ids = [category.id for category in created_categorys if category.id ]
             categories = data.pop("categories", None)
@@ -31,7 +38,9 @@ def create_task():
         
         session.add(task)
         session.commit()
-        
+
+        linking_categories(repeated_categories, task.id)
+
         if categorys_ids:
             creating_tasks_categories(categorys_ids, task.id)
         
@@ -101,13 +110,16 @@ def update_task(id):
 
 
 def delete_task(id):
-    session = current_app.db.session
-    task_delete = TasksModel.query.filter(TasksModel.id == id).first()
+    try:
+        session = current_app.db.session
+        task = TasksModel.query.get_or_404(id)
+        
+        session.delete(task)
+        session.commit()
+        
+        
+        return '', HTTPStatus.NO_CONTENT
 
-    if not task_delete:
-        return {"msg": "task not found!"}, HTTPStatus.NOT_FOUND
-
-    session.delete(task_delete)
-    session.commit()
-    return "", HTTPStatus.NO_CONTENT
-
+    except NotFound:
+        return {"msg":"category not found!"}, HTTPStatus.NOT_FOUND
+    
